@@ -1,8 +1,8 @@
-function [Z]= sacados(V, W, wmax)
+function [T]= sacados(V, W, wmax)
 
 %do we have only positive integer values?
 %set a counter to avoid annoying questions
-j=2;
+j=0;
 for i=1:size(V,2)
 	if V(i) < 0
 		if j == 3
@@ -41,8 +41,7 @@ W=[0 W];
 
 %Initialize the value matrix with zeros
 M=zeros(size(V,2),wmax);
-%Initialize the keep matrix with zeros
-K=M;
+
 
 %j goes over all rows in the value matrix 'M' and with that over all items in 'v'
 for j=2:size(M,1)
@@ -56,14 +55,14 @@ for j=2:size(M,1)
 				if V(j) > M(j-1,i)
 					%current value is higher, fit item in
 					M(j,i) = V(j);
-					K(j,i) = 1;
 				else
 					%current value is not higher, copy the value from the position above
 					M(j,i) = M(j-1,i);
 				end
 			else
 				
-				%rest weight avaible, calculate the sum of the value of the item you could fit in with the rest weight and the current item
+				%rest weight avaible, calculate the sum of the value of 
+				%the item you could fit in with the rest weight and the current item
 			
 				m=V(j)+M(j-1, i-W(j));
 				
@@ -71,7 +70,6 @@ for j=2:size(M,1)
 				if m > M(j-1,i)
 					%it is, fit it in
 					M(j,i) = m;
-					K(j,i) = 1;
 				%it's not
 				else 
 					%copy value from above
@@ -83,11 +81,14 @@ for j=2:size(M,1)
 		end
 	end
 end
-wmax
+
+K
+M
 
 %now let's build our vector with all the items we keep, for that we are going backwards
-%through the keep matrix 'K' and look for the 1. If we find a 1 in the last row of K in the column wmax of K
-%we'll add it. If we add a item, we calculate the remaining weight and look for a 1 in K(row_above_current_row, wmax-weight_of_added_item)
+%through the value matrix. We add an item to 'T' when M(j,wmax) is different from M(j-1,wmax), which means
+%we didn't copy the value from the row above. Then we update our current weight wmax. If wmax equals 0, our knapsack is full
+%and we are done.
 
 T=zeros(1,numel(V));
 
@@ -102,4 +103,3 @@ for j=size(K,1):-1:2
 end
 %delete the first item (always the 0) which we added to make dynamic programming easier
 T(1)=[];
-T
